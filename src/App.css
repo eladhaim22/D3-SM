@@ -1,0 +1,78 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body {
+  font: 12px sans-serif;
+}
+
+.mouse_area {
+  opacity: 0;
+}
+.guides {
+  stroke-width: 1px;
+}
+.guides line {
+  stroke: #BBF;
+  shape-rendering: crispEdges;
+}
+.guides circle {
+  fill: #BBF;
+  stroke: #348;
+  opacity: 0.2;
+}
+
+
+.rules line, .rules path {
+  shape-rendering: crispEdges;
+  stroke: #000;
+}
+
+.rules .tick {
+}
+.rules .minor {
+  stroke: #BBB;
+}
+.rules .domain {
+  fill: none;
+}
+
+.grid .tick {
+  stroke: #CCC;
+}
+
+
+.series path {
+  fill: none;
+  stroke: #348;
+  stroke-width: 3px;
+}
