@@ -4,10 +4,13 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.3.3",
-    "d3": "^5.11.0",
+    "algebra.js": "^0.2.6",
+    "d3": "^3.5.17",
     "d3-axis": "^1.0.12",
     "d3-scale": "^3.0.1",
     "d3-selection": "^1.4.0",
+    "fraction.js": "^4.0.12",
+    "function-plot": "^1.18.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-scripts": "3.1.1"
