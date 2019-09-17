@@ -2,7 +2,6 @@ const Fraction = require('fraction.js');
 const algebra = require("algebra.js");
 
 export const getNodeNameByPoint = (point) => {
-    debugger;
     const { p, q } = point;
     if (q < 0){
         return 'silla';
@@ -57,26 +56,28 @@ export const toDecimal = (x) => (
     x.numer / x.denom
 );
 
-export const findBalancePoints = (func, p, q) => {
-    const balancePoints = [];
-    const funcPoints = algebra.parse(`${func.toString()} = 0`).solveFor('a');
+export const findPoints = (func, p, q) => {
+    console.log('findPoints');
+    const points = [];
+    if(!func || !p || !q) return [];
+    const funcPoints = algebra.parse(`${func} = 0`).solveFor('x');
     Array.isArray(funcPoints) ? 
-        balancePoints.push(...funcPoints.map(x => [toDecimal(x),0])) :
-        balancePoints.push([toDecimal(funcPoints),0]);
+        points.push(...funcPoints.map(x => [toDecimal(x),0])) :
+        points.push([toDecimal(funcPoints),0]);
 
     if(p.toString().split('a').length > 1){
         const pPoints = algebra.parse(`${p.toString()} = 0`).solveFor('a');
         Array.isArray(pPoints) ? 
-        balancePoints.push(...pPoints.map(x => [0, toDecimal(x)])) :
-        balancePoints.push([0,toDecimal(pPoints)]);
+        points.push(...pPoints.map(x => [toDecimal(x), 0])) :
+        points.push([toDecimal(pPoints), 0]);
     }
-    
+
     if(q.toString().split('a').length > 1){
         const qPoints = algebra.parse(`${q.toString()} = 0`).solveFor('a');
         Array.isArray(qPoints) ? 
-        balancePoints.push(...qPoints.map(x => [toDecimal(x), 0])) :
-        balancePoints.push([toDecimal(qPoints), 0]);
+        points.push(...qPoints.map(x => [toDecimal(x), 0])) :
+        points.push([toDecimal(qPoints), 0]);
     }
 
-    return balancePoints;
+    return points;
 }
