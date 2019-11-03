@@ -1,78 +1,108 @@
-import React, { useEffect, useMemo } from 'react';
-import { getNodeNameByPoint, toFraction, findPoints } from '../helpers/helper';
+import React, { useMemo, useState } from 'react';
+import { useTwoPointsPrecision } from '../customHooks';
+import { getNodeNameByPoint, findPoints, evaluate } from '../helpers/helper';
+import { uniqBy, round, uniq, orderBy, random } from 'loadsh';
 const functionPlot = require("function-plot");
 
-const getAnnotations = (importantPoints, pValue, qValue) => {
-  let phaseDiagramPoints = importantPoints.map(x => x[0])
-    .filter((x, i, a) => a.indexOf(x) == i).sort((a,b) => (a - b));
-  phaseDiagramPoints = phaseDiagramPoints.reduce((acc , cur, idx, src) => {
-    if(idx == 0){
-      return acc.concat([cur - 1, cur, src[idx + 1] ? (cur + src[idx + 1]) /2 : cur + 1])
+const getSamplePointsOnEachRange = (forkPoints, pValue, qValue) => {
+  let phaseDiagramPoints = orderBy(uniq(forkPoints));
+  let testPoints = [];
+  for(let i=0;i<phaseDiagramPoints.length;i++){
+    let numberToTest;
+    if(i===0){
+      numberToTest = random(phaseDiagramPoints[i] - 1,phaseDiagramPoints[i],true);
+      phaseDiagramPoints[i+1] ? 
+        testPoints.push(random(phaseDiagramPoints[i],phaseDiagramPoints[i+1],true)): 
+        testPoints.push(phaseDiagramPoints[i]+1); 
     }
-
-    if(idx == src.length - 1){
-      return acc.concat([cur, cur + 1]);
+    else {
+      if(i === phaseDiagramPoints.length -1){
+        numberToTest = random(phaseDiagramPoints[i],phaseDiagramPoints[i] + 1,true);
+        debugger;
+      }
+      else {
+        numberToTest = random(phaseDiagramPoints[i-1], phaseDiagramPoints[i],true);
+      }
     }
-
-    return acc.concat([cur, (cur + src[idx + 1]) /2 ]);
-  }, [])
-
-  debugger;
-  return phaseDiagramPoints.map(point => {
-    const test =  toFraction(point);
-    debugger;
-    return {
-      x: point,
-      text: getNodeNameByPoint(
-        {
-          p: parseFloat(eval(pValue.eval({a: toFraction(point)}).toString())), 
-          q: parseFloat(eval(qValue.eval({a: toFraction(point)}).toString()))
-        }),
-    }
-  });
+    testPoints.push(numberToTest);
+    testPoints.push(phaseDiagramPoints[i]);
+  }
+  testPoints = orderBy(testPoints);
+  return testPoints.map(point => 
+    getNodeNameByPoint(
+    {
+      p: round(evaluate(pValue,{a: point}),10), 
+      q: round(evaluate(qValue,{a: point}),10),
+    })
+  );
 }
 
-const PhaseDiagram = ({func, pValue, qValue, aValue}) => {
-  const importantPoints = useMemo(() => 
-      findPoints(func, pValue, qValue), [func, pValue, qValue]);
-  useEffect(() => {
-    if(func && pValue && qValue){
-      functionPlot({
+const PhaseDiagram = ({
+  func,
+  pValue,
+  qValue,
+  handleSetPoints,
+}) => {
+  const forkPoints = useMemo(() => findPoints(func, pValue, qValue), [func, pValue, qValue]);
+  const trajectoryTypes = useMemo(() => uniqBy(getSamplePointsOnEachRange(forkPoints, pValue, qValue),'id'), [forkPoints]);
+  const [activeClassId, setActiveClassId] = useState(0);
+  
+  const renderUpdate = (a) => {
+    const p = round(evaluate(pValue,{a:a}),10);
+    const q = round(evaluate(qValue,{a:a}),10);
+    handleSetPoints([p,q]);  
+    setActiveClassId(getNodeNameByPoint({p,q}).id);
+  }
+
+  const graph = useMemo(() => 
+  {
+    if(pValue && qValue){
+      return functionPlot({
             title: 'Diagrama de fases',
             target: document.querySelector("#phase-diagram"),
-            yAxis: { domain: [-10, 10] },
-            tip: {},
+            width: 900,
+            height: 400,
+            yAxis: { domain: [-5, 5] },
+            tip: {
+              renderer: renderUpdate,
+            },
             grid: true,
             data: [
                 {
                     fn: '0 * x',
                 },
                 {
-                    points: importantPoints.map(point => [point[0],0]),
+                    points: forkPoints.map(point => [point,0]),
                     fnType: 'points',
                     graphType: 'scatter',
                     color: 'black',
                     attr: {
-                    r: 3,
-                    },
-                },
-                {
-                    points: [[aValue,0]],
-                    fnType: 'points',
-                    graphType: 'scatter',
-                    color: 'red',
-                    attr: {
-                    r: 3,
+                      r: 3,
                     },
                 },
             ],
-            annotations: getAnnotations(importantPoints, pValue, qValue),
-          });
-        }
-    }, [importantPoints, aValue]);
-    return (
-        <div id="phase-diagram"></div>
-    );
+            annotations: forkPoints.map(p => (
+              {
+                x: p,
+                text: `a= ${round(p,3)}`
+              })),
+      });
+    }
+    else {
+      return null;
+    }
+  },[pValue, qValue, forkPoints]);
+
+  useTwoPointsPrecision(graph, renderUpdate, forkPoints);
+  return (
+    <div id='phase-diagram'>
+      <div className='guide-container'>
+        {trajectoryTypes.map(x => 
+          <div id={x.id} key={x.id} className={activeClassId === x.id && 'active'}>{x.text}</div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default PhaseDiagram;

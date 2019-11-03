@@ -1,37 +1,48 @@
 import React from 'react';
 import './App.css';
 import * as d3 from 'd3';
-import { TextField, Button, Grid } from '@material-ui/core';
 import PhaseDiagram from './components/PhaseDiagram';
 import Map from './components/Map';
-import AlfaFunction from './components/AlfaFunction';
+import { AppBar, Toolbar, Typography, makeStyles, TextField, Button, Grid  } from '@material-ui/core';
+const nerdamer = require('nerdamer/all');
 
 window.d3 = d3;
-const algebra = require("algebra.js");
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+  appBar:{
+    marginBottom: theme.spacing(2),
+  },
+}));
 
 function App() {
+  const classes = useStyles();
   const [func, setFunc] = React.useState(null);
   const [points, setPoints] = React.useState([]);
   const [pValue, setP] = React.useState(null);
   const [qValue, setQ] = React.useState(null);
-  const [aValue, setA] = React.useState(null);
-
   const calculateFunction = () => {
-    const p = algebra.parse(`-((${values.inputA}) + (${values.inputD}))`);
-    const q = algebra.parse(`(${values.inputA}) * (${values.inputD}) - (${values.inputB}) * (${values.inputC})`);
+    const p = nerdamer(`simplify(-((${values.inputA}) + (${values.inputD})))`);
+    const q = nerdamer(`simplify((${values.inputA}) * (${values.inputD}) - (${values.inputB}) * (${values.inputC}))`); 
     setQ(q);
     setP(p);
-    debugger;
-    const func = q.subtract(p.multiply(p).divide(4));
-    setFunc(func.toString().replace(/a/g,'x'));
+    setFunc(nerdamer(`${q}-((${p})^2)/4`));
   }
 
   const [values, setValues] = React.useState(
       {
-        inputA: '-1',
-        inputB: '2a',
+        inputA: '2a^2',
+        inputB: '2',
         inputC: 'a',
-        inputD: '-1',
+        inputD: 'a',
       },
   );
 
@@ -40,72 +51,88 @@ function App() {
   };
 
   return (
-    <div className="App" id="app">
+    <div className={classes.root} id="app">
+      <AppBar position="static" className={classes.appBar}>
+        <Toolbar>
+          <Typography variant="h4" className={classes.title}>
+            Sistema linales 2D con escenarios(Acoplados)
+          </Typography>
+          <Button onClick={calculateFunction} variant="contained">Calcular</Button>
+        </Toolbar>
+      </AppBar>
       <Grid container justify="center">
-        <Grid container xs={6}>
-          <Grid item xs={5}>
+          <Grid item xs={3}>
             <div style={{display:'inline-block',fontSize: '128px'}}>A=(</div>
           </Grid>
-          <Grid item xs={6}>
-            <TextField
-              name="inputA"
-              label="a"
-              value={values.inputA}
-              onChange={handleChange('inputA')}
-              margin="normal"
-            />
-            <TextField
-              name="inputB"
-              label="b"
-              value={values.inputB}
-              onChange={handleChange('inputB')}
-              margin="normal"
-            />
-            <TextField
-              name="inputC"
-              label="c"
-              value={values.inputC}
-              onChange={handleChange('inputC')}
-              margin="normal"
-            />
-            <TextField
-              name="inputD"
-              label="d"
-              value={values.inputD}
-              onChange={handleChange('inputD')}
-              margin="normal"
-            />
+          <Grid container item xs={4}> 
+            <Grid item xs={6}>
+              <TextField
+                name="inputA"
+                label="a"
+                value={values.inputA}
+                onChange={handleChange('inputA')}
+                margin="normal"
+              />
             </Grid>
-            <Grid item xs={1}>
-              <div style={{display:'inline-block',fontSize: '128px'}}>)</div>
+            <Grid item xs={6}>
+              <TextField
+                name="inputB"
+                label="b"
+                value={values.inputB}
+                onChange={handleChange('inputB')}
+                margin="normal"
+              />
             </Grid>
-          </Grid>
+            <Grid item xs={6}>
+              <TextField
+                name="inputC"
+                label="c"
+                value={values.inputC}
+                onChange={handleChange('inputC')}
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                name="inputD"
+                label="d"
+                value={values.inputD}
+                onChange={handleChange('inputD')}
+                margin="normal"
+              />
+            </Grid>
         </Grid>
-        <div style={{color: 'black'}}>{`q = ${qValue}`}</div>
-        <div style={{color: 'black'}}>{`p = ${pValue}`}</div>
-        <Button onClick={calculateFunction}>Calcular</Button>
-        <Grid container justify="center">
-          <Grid item xs={4}>
-            {func && <Map points={points}/>}
+          <Grid item xs={1}>
+            <div style={{display:'inline-block',fontSize: '128px'}}>)</div>
           </Grid>
-          <Grid item xs={4}>
-            <AlfaFunction
-              handleSetA={setA}
-              handleSetPoints={setPoints}
-              {...{
-                  func, 
-                  pValue, 
-                  qValue}
-              }
-            />
-            <PhaseDiagram
-              {...{ 
-                  func,  
-                  pValue, 
-                  qValue, 
-                  aValue}
-              }
-            />
+          <Grid container item xs={4}>
+            {func &&
+              <>
+                <Grid item xs={12}>
+                  <Typography variant="h5">{`q = ${qValue}`}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="h5">{`p = ${pValue}`}</Typography>
+                </Grid>
+              </>
+            }
+          </Grid>
+          <Grid container>
+            <Grid item xs={6}>
+                {func && <Map 
+                  points={points}
+                  qValue={qValue}
+                  pValue={pValue}
+                />} 
+            </Grid>
+            <Grid item xs={6}>
+            {<PhaseDiagram
+                handleSetPoints={setPoints}
+                func={func}
+                pValue={pValue}
+                qValue={qValue}
+              />}
+            </Grid>
           </Grid>
         </Grid>
     </div>

@@ -1,83 +1,90 @@
-const Fraction = require('fraction.js');
-const algebra = require("algebra.js");
+import { round, uniqBy } from 'loadsh';
+const nerdamer = require('nerdamer/all');
+var algebrite = require('algebrite');
 
+// devuelve el nombre de la trayectoria dependiendo en p y q.
 export const getNodeNameByPoint = (point) => {
     const { p, q } = point;
     if (q < 0){
-        return 'silla';
+        return {text:'Silla', id:1};
     }
 
     if(q === 0 && p === 0){
-        return 'subte';
+        return {text: 'Subte', id:2};
     }
 
     if(q === 0 && p > 0){
-        return 'infinitos puntos de equilibrio atractores';
+        return {text: 'Infinitos puntos de equilibrio atractores', id:3};
     }
 
     if(q === 0 && p < 0){
-        return 'infinitos puntos de equilibrio repulsores';
+        return {text: 'Infinitos puntos de equilibrio repulsores', id:4};
     }
 
     if(q > 0 && p === 0){
-        return 'centro';
+        return {text: 'Centro', id:5};
     }
 
-    if(p > 0 && q === Math.pow(p,2)/4){
-        return 'nodo atractor degenerado';
+    if(p > 0 && Math.abs(q - Math.pow(p,2)/4) < 0.00001){
+        return {text: 'Nodo atractor degenerado', id:6};
     }
 
-    if(p < 0 && q === Math.pow(p,2)/4){
-        return 'nodo repulsor degenerado';
+    if(p < 0 && Math.abs(q - Math.pow(p,2)/4) < 0.00001){
+        return {text: 'Nodo repulsor degenerado', id:7};
     }
 
-    if(p < 0 && q > Math.pow(p,2)/4){
-        return 'foco repulsor ';
+    if(p < 0 && q > round(Math.pow(p,2)/4,10)){
+        return {text: 'Foco repulsor', id:8};
     }
 
-    if(p > 0 && q > Math.pow(p,2)/4){
-        return 'foco atractor';
+    if(p > 0 && q > round(Math.pow(p,2)/4,10)){
+        return {text: 'Foco atractor', id:9};
     }
 
     if(p > 0){
-        return 'nodos atractores';
+        return {text: 'Nodos atractores', id:10};
     }
 
     if(p < 0){
-        return 'nodos repulsores';
+        return {text: 'Nodos repulsores', id:11};
     }
 };
 
-export const toFraction = (x) => (
-    new algebra.Fraction(new Fraction(x).n * new Fraction(x).s, new Fraction(x).d)
-);
-  
-export const toDecimal = (x) => (
-    x.numer / x.denom
-);
+export const evaluate = (expression,resolveFor) => {
+    return parseFloat(nerdamer(expression).evaluate(resolveFor).toDecimal());
+} 
 
+// devuelve los puntos en el mapa que realments nos importa
 export const findPoints = (func, p, q) => {
-    console.log('findPoints');
-    const points = [];
     if(!func || !p || !q) return [];
-    const funcPoints = algebra.parse(`${func} = 0`).solveFor('x');
-    Array.isArray(funcPoints) ? 
-        points.push(...funcPoints.map(x => [toDecimal(x),0])) :
-        points.push([toDecimal(funcPoints),0]);
+    const points = [];
+    tryToSolve(func.toString()).map(x => points.push(x));
+    tryToSolve(q.toString())
+        .map(x => points.push(x));
+    tryToSolve(p.toString())
+        .filter(x => evaluate(q,{a:x}) >= 0)
+        .map(x => points.push(x));
+    return points;
+}
 
-    if(p.toString().split('a').length > 1){
-        const pPoints = algebra.parse(`${p.toString()} = 0`).solveFor('a');
-        Array.isArray(pPoints) ? 
-        points.push(...pPoints.map(x => [toDecimal(x), 0])) :
-        points.push([toDecimal(pPoints), 0]);
+// devuelve solo raizes reales
+const tryToSolve = (equation) => {
+    try{
+        return uniqBy(algebrite.nroots(equation.replace(/a/g,'x')).tensor.elem.map(x => x.d));;
     }
-
-    if(q.toString().split('a').length > 1){
-        const qPoints = algebra.parse(`${q.toString()} = 0`).solveFor('a');
-        Array.isArray(qPoints) ? 
-        points.push(...qPoints.map(x => [toDecimal(x), 0])) :
-        points.push([toDecimal(qPoints), 0]);
+    catch(e) {
+        console.log(e);
+        return [];
     }
+}
 
+// Generamos 200 puntos para dibujar la curva
+export const getPoints = (pValue, qValue) => {
+    const points = [];
+    for(let i=-10;i<10;i=i+0.05){
+        let p = evaluate(pValue,{a:i});
+        let q = evaluate(qValue,{a:i});
+        points.push([p,q]);
+    }
     return points;
 }

@@ -1,22 +1,5 @@
 .App {
-  margin-top: 20px;
   text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 .App-link {
@@ -71,9 +54,33 @@ body {
   stroke: #CCC;
 }
 
-
 .series path {
   fill: none;
   stroke: #348;
   stroke-width: 3px;
+}
+
+#phase-diagram {
+  position: relative;
+  display: inline-block;
+}
+
+.guide-container {
+  position: absolute;
+  left: 60px;
+  bottom: 40px;
+}
+.annotations > text {
+  font-size: 10px;
+}
+.guide-container > div {
+  transform-origin: 0%;
+}
+.active {
+  color: red;
+  transition: 300ms !important;
+  -webkit-transform: scale(1.5)!important;
+  -ms-transform: scale(1.5)!important;
+  transform: scale(1.5)!important;
+  transform-origin: 0%;
 }
