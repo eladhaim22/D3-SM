@@ -70,7 +70,18 @@ export const findPoints = (func, p, q) => {
 // devuelve solo raizes reales
 const tryToSolve = (equation) => {
     try{
-        return uniqBy(algebrite.nroots(equation.replace(/a/g,'x')).tensor.elem.map(x => x.d));;
+        const Xequation = equation.replace(/a/g,'x');
+        switch (parseInt(algebrite.deg(Xequation).toString())){
+            //constante
+            case 0:
+                return [];
+            //polinomio de grado 1
+            case 1:
+                return [parseFloat(algebrite.roots(Xequation).toString())];
+            //de mayor grado
+            default:
+                return uniqBy(algebrite.nroots(Xequation).tensor.elem.map(x => x.d));
+        }
     }
     catch(e) {
         console.log(e);
