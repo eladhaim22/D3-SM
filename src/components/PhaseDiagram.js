@@ -18,7 +18,6 @@ const getSamplePointsOnEachRange = (forkPoints, pValue, qValue) => {
     else {
       if(i === phaseDiagramPoints.length -1){
         numberToTest = random(phaseDiagramPoints[i],phaseDiagramPoints[i] + 1,true);
-        debugger;
       }
       else {
         numberToTest = random(phaseDiagramPoints[i-1], phaseDiagramPoints[i],true);
@@ -57,6 +56,8 @@ const PhaseDiagram = ({
   const graph = useMemo(() => 
   {
     if(pValue && qValue){
+      const svg = document.querySelector("#phase-diagram>svg");
+      svg && document.querySelector("#phase-diagram").removeChild(svg);
       return functionPlot({
             title: 'Diagrama de fases',
             target: document.querySelector("#phase-diagram"),
@@ -84,7 +85,7 @@ const PhaseDiagram = ({
             annotations: forkPoints.map(p => (
               {
                 x: p,
-                text: `a= ${round(p,3)}`
+                text: `a=${round(p,3)}`
               })),
       });
     }
