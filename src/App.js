@@ -39,10 +39,10 @@ function App() {
 
   const [values, setValues] = React.useState(
       {
-        inputA: 'a',
-        inputB: '-1',
+        inputA: '-1',
+        inputB: 'a',
         inputC: '-1',
-        inputD: '2',
+        inputD: 'a + 1',
       },
   );
 
@@ -126,12 +126,12 @@ function App() {
                 />} 
             </Grid>
             <Grid item xs={6}>
-            {<PhaseDiagram
+              <PhaseDiagram
                 handleSetPoints={setPoints}
                 func={func}
                 pValue={pValue}
                 qValue={qValue}
-              />}
+              />
             </Grid>
           </Grid>
         </Grid>

@@ -5,35 +5,43 @@ import { uniqBy, round, uniq, orderBy, random } from 'loadsh';
 const functionPlot = require("function-plot");
 
 const getSamplePointsOnEachRange = (forkPoints, pValue, qValue) => {
-  let phaseDiagramPoints = orderBy(uniq(forkPoints));
-  let testPoints = [];
-  for(let i=0;i<phaseDiagramPoints.length;i++){
-    let numberToTest;
-    if(i===0){
-      numberToTest = random(phaseDiagramPoints[i] - 1,phaseDiagramPoints[i],true);
-      phaseDiagramPoints[i+1] ? 
-        testPoints.push(random(phaseDiagramPoints[i],phaseDiagramPoints[i+1],true)): 
-        testPoints.push(phaseDiagramPoints[i]+1); 
-    }
-    else {
-      if(i === phaseDiagramPoints.length -1){
-        numberToTest = random(phaseDiagramPoints[i],phaseDiagramPoints[i] + 1,true);
+  if(pValue && qValue){
+    let phaseDiagramPoints = orderBy(uniq(forkPoints));
+    let testPoints = [];
+    for(let i=0;i<phaseDiagramPoints.length;i++){
+      let numberToTest;
+      if(i===0){
+        numberToTest = random(phaseDiagramPoints[i] - 1,phaseDiagramPoints[i],true);
+        phaseDiagramPoints[i+1] ? 
+          testPoints.push(random(phaseDiagramPoints[i],phaseDiagramPoints[i+1],true)): 
+          testPoints.push(phaseDiagramPoints[i]+1); 
       }
       else {
-        numberToTest = (phaseDiagramPoints[i] + phaseDiagramPoints[i+1]) / 2;
+        if(i === phaseDiagramPoints.length -1){
+          numberToTest = random(phaseDiagramPoints[i],phaseDiagramPoints[i] + 1,true);
+        }
+        else {
+          numberToTest = (phaseDiagramPoints[i] + phaseDiagramPoints[i+1]) / 2;
+        }
       }
+      testPoints.push(numberToTest);
+      testPoints.push(phaseDiagramPoints[i]);
     }
-    testPoints.push(numberToTest);
-    testPoints.push(phaseDiagramPoints[i]);
+    if(testPoints.length == 0){
+      testPoints.push(0);
+    }
+    testPoints = orderBy(testPoints);
+    return testPoints.map(point => 
+      getNodeNameByPoint(
+      {
+        p: round(evaluate(pValue,{a: point}),10), 
+        q: round(evaluate(qValue,{a: point}),10),
+      })
+    );
   }
-  testPoints = orderBy(testPoints);
-  return testPoints.map(point => 
-    getNodeNameByPoint(
-    {
-      p: round(evaluate(pValue,{a: point}),10), 
-      q: round(evaluate(qValue,{a: point}),10),
-    })
-  );
+  else {
+    return [];
+  }
 }
 
 const PhaseDiagram = ({
@@ -55,7 +63,7 @@ const PhaseDiagram = ({
 
   const graph = useMemo(() => 
   {
-    if(pValue && qValue){
+    if(pValue && qValue && func){
       const svg = document.querySelector("#phase-diagram>svg");
       svg && document.querySelector("#phase-diagram").removeChild(svg);
       return functionPlot({
@@ -92,7 +100,7 @@ const PhaseDiagram = ({
     else {
       return null;
     }
-  },[pValue, qValue, forkPoints]);
+  },[pValue, qValue, forkPoints, func]);
 
   useTwoPointsPrecision(graph, renderUpdate, forkPoints);
   return (
