@@ -39,10 +39,10 @@ function App() {
 
   const [values, setValues] = React.useState(
       {
-        inputA: '-1',
-        inputB: '-1+a',
-        inputC: '1',
-        inputD: '-a',
+        inputA: 'a',
+        inputB: '-1',
+        inputC: '-1',
+        inputD: '2',
       },
   );
 

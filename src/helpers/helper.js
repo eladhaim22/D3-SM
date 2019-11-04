@@ -77,10 +77,10 @@ const tryToSolve = (equation) => {
                 return [];
             //polinomio de grado 1
             case 1:
-                return [parseFloat(algebrite.roots(Xequation).toString())];
+                return [eval(algebrite.roots(Xequation).toString())];
             //de mayor grado
             default:
-                return uniqBy(algebrite.nroots(Xequation).tensor.elem.map(x => x.d));
+                return uniqBy(algebrite.nroots(Xequation).tensor.elem.filter(filterIrrational).map(x => x.d));
         }
     }
     catch(e) {
@@ -88,6 +88,10 @@ const tryToSolve = (equation) => {
         return [];
     }
 }
+
+const filterIrrational = (number) => (
+    !number.toString().includes('i') ? number : undefined
+);
 
 // Generamos 200 puntos para dibujar la curva
 export const getPoints = (pValue, qValue) => {
