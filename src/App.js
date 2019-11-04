@@ -39,10 +39,10 @@ function App() {
 
   const [values, setValues] = React.useState(
       {
-        inputA: 'a^2 + 1',
-        inputB: 'a',
-        inputC: '2a^2',
-        inputD: '1',
+        inputA: '-1',
+        inputB: '-1+a',
+        inputC: '1',
+        inputD: '-a',
       },
   );
 

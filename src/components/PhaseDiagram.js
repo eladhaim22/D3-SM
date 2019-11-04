@@ -20,7 +20,8 @@ const getSamplePointsOnEachRange = (forkPoints, pValue, qValue) => {
         numberToTest = random(phaseDiagramPoints[i],phaseDiagramPoints[i] + 1,true);
       }
       else {
-        numberToTest = random(phaseDiagramPoints[i-1], phaseDiagramPoints[i],true);
+        debugger;
+        numberToTest = (phaseDiagramPoints[i] + phaseDiagramPoints[i+1]) / 2;
       }
     }
     testPoints.push(numberToTest);
