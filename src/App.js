@@ -55,7 +55,7 @@ function App() {
       <AppBar position="static" className={classes.appBar}>
         <Toolbar>
           <Typography variant="h4" className={classes.title}>
-            Sistema linales 2D con escenarios(Acoplados)
+            Sistema lineales 2D con escenarios(Acoplados)
           </Typography>
           <Button onClick={calculateFunction} variant="contained">Calcular</Button>
         </Toolbar>
